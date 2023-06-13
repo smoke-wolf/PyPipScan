@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QMainWindow, QWidget, QVBoxLayout, \
     QLabel, QTextEdit, QPushButton
@@ -18,6 +20,11 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
         central_widget.setLayout(layout)
+
+        # Create the "Clear pycache" button
+        clear_button = QPushButton("Clear pycache")
+        clear_button.clicked.connect(self.clear_pycache)
+        layout.addWidget(clear_button)
 
         # Create the directory selection label and button
         label = QLabel("Select a directory:")
@@ -42,6 +49,24 @@ class MainWindow(QMainWindow):
 
         if dir_path:
             self.directory_path = dir_path
+
+    def clear_pycache(self):
+        try:
+            # Check if a directory is selected
+            if not hasattr(self, "directory_path"):
+                raise ValueError("No directory selected")
+
+            # Remove __pycache__ directories
+            pycache_dir = os.path.join(self.directory_path, "__pycache__")
+            if os.path.exists(pycache_dir):
+                shutil.rmtree(pycache_dir)
+
+            # Show a message box to the user
+            QMessageBox.information(self, "Success", "pycache files cleared successfully!")
+
+        except Exception as e:
+            # Show an error message box
+            QMessageBox.critical(self, "Error", f"Error: {e}")
 
     def generate_packages(self):
         try:
