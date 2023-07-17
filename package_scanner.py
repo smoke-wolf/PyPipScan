@@ -1,6 +1,6 @@
 import os
 import shutil
-
+import sys
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox, QMainWindow, QWidget, QVBoxLayout, \
     QLabel, QTextEdit, QPushButton
@@ -34,6 +34,10 @@ class MainWindow(QMainWindow):
         button.clicked.connect(self.browse_directory)
         layout.addWidget(button)
 
+        # Create the status label
+        self.status_label = QLabel()
+        layout.addWidget(self.status_label)
+
         # Create the text area to display package information
         self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
@@ -50,7 +54,7 @@ class MainWindow(QMainWindow):
         if dir_path:
             self.directory_path = dir_path
 
-    
+    @staticmethod
     def remove_pycache(directory):
         for root, dirs, files in os.walk(directory):
             # Remove __pycache__ directories
@@ -59,7 +63,7 @@ class MainWindow(QMainWindow):
                     dir_path = os.path.join(root, dir_name)
                     print(f"Removing directory: {dir_path}")
                     shutil.rmtree(dir_path)
-    
+
             # Remove .pyc files
             for file_name in files:
                 if file_name.endswith(".pyc"):
@@ -67,30 +71,23 @@ class MainWindow(QMainWindow):
                     print(f"Removing file: {file_path}")
                     os.remove(file_path)
 
-    def generate_packages(self):
+    def clear_pycache(self):
         try:
             # Check if a directory is selected
             if not hasattr(self, "directory_path"):
                 raise ValueError("No directory selected")
 
-            # Scan the directory for packages
-            packages = self.scan_directory(self.directory_path)
+            # Remove pycache and .pyc files
+            self.remove_pycache(self.directory_path)
 
-            # Write the packages to the text area
-            self.text_edit.clear()
-            if packages:
-                self.text_edit.append("Packages Used:")
-                for package in packages:
-                    self.text_edit.append(package)
-            else:
-                self.text_edit.append("No packages found.")
-
-            # Show a message box to the user
-            QMessageBox.information(self, "Success", "Packages compiled successfully!")
+            # Show a success message
+            self.status_label.setText("pycache cleared successfully!")
+            self.status_label.setStyleSheet("color: green;")
 
         except Exception as e:
-            # Show an error message box
-            QMessageBox.critical(self, "Error", f"Error: {e}")
+            # Show an error message
+            self.status_label.setText(f"Error: {e}")
+            self.status_label.setStyleSheet("color: red;")
 
     def extract_package_name(self, line):
         # Remove leading/trailing whitespaces and split the line
@@ -126,10 +123,33 @@ class MainWindow(QMainWindow):
 
         return packages
 
+    def generate_packages(self):
+        try:
+            # Check if a directory is selected
+            if not hasattr(self, "directory_path"):
+                raise ValueError("No directory selected")
+
+            # Scan the directory for packages
+            packages = self.scan_directory(self.directory_path)
+
+            # Write the packages to the text area
+            self.text_edit.clear()
+            if packages:
+                self.text_edit.append("Packages Used:")
+                for package in packages:
+                    self.text_edit.append(package)
+            else:
+                self.text_edit.append("No packages found.")
+
+            # Show a message box to the user
+            QMessageBox.information(self, "Success", "Packages compiled successfully!")
+
+        except Exception as e:
+            # Show an error message box
+            QMessageBox.critical(self, "Error", f"Error: {e}")
+
 
 if __name__ == "__main__":
-    import sys
-
     # Create the PyQt5 application
     app = QApplication(sys.argv)
 
