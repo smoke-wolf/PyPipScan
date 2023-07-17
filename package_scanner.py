@@ -50,23 +50,22 @@ class MainWindow(QMainWindow):
         if dir_path:
             self.directory_path = dir_path
 
-    def clear_pycache(self):
-        try:
-            # Check if a directory is selected
-            if not hasattr(self, "directory_path"):
-                raise ValueError("No directory selected")
-
+    
+    def remove_pycache(directory):
+        for root, dirs, files in os.walk(directory):
             # Remove __pycache__ directories
-            pycache_dir = os.path.join(self.directory_path, "__pycache__")
-            if os.path.exists(pycache_dir):
-                shutil.rmtree(pycache_dir)
-
-            # Show a message box to the user
-            QMessageBox.information(self, "Success", "pycache files cleared successfully!")
-
-        except Exception as e:
-            # Show an error message box
-            QMessageBox.critical(self, "Error", f"Error: {e}")
+            for dir_name in dirs:
+                if dir_name == "__pycache__":
+                    dir_path = os.path.join(root, dir_name)
+                    print(f"Removing directory: {dir_path}")
+                    shutil.rmtree(dir_path)
+    
+            # Remove .pyc files
+            for file_name in files:
+                if file_name.endswith(".pyc"):
+                    file_path = os.path.join(root, file_name)
+                    print(f"Removing file: {file_path}")
+                    os.remove(file_path)
 
     def generate_packages(self):
         try:
