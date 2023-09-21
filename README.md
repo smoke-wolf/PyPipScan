@@ -14,7 +14,7 @@ Package Scanner is a Python tool that allows you to scan a directory, look throu
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/package-scanner.git
+   git clone https://github.com/smoke-wolf/package-scanner.git
 Install the required dependencies:
 
 ## Usage
